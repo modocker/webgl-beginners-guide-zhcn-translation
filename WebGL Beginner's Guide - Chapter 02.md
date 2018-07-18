@@ -282,6 +282,11 @@ gl.enableVertexAttribArray (aVertexPosition);
 
 ![Diagram](./attachments/1531820750605.drawio.html)
 
+
+![enter description here](./images/attachments_1531820750605.drawio.png)
+
+
+
 ### 渲染
 
 当 VBO 第一完成，并且映射到顶点着色器中相应的 Attribute 变量中后，我们就可以开始渲染了。
