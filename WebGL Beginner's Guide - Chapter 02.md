@@ -442,7 +442,7 @@ gl.drawElements(Mode, Count, Type, Offset)
 
 	![LINE_LOOP](./images/1531898077977.png)
 	
-	- 讲解：当使用 `LINE_LOOP` 模式绘制时，WebGL 会使用直线连接索引中的每一个顶点，然后将索引中的最后一个顶点与第一个顶点相连。在这个实例中，我们使用了 `indices = [2,3,4,1,0]`。
+	- 讲解：当使用 `LINE_LOOP` 模式绘制时，WebGL 会使用直线连接索引中的每一个顶点，然后将索引中的最后一个顶点与第一个顶点相连。在这个示例中，我们使用了 `indices = [2,3,4,1,0]`。
 
 - `LINE_STRIP`
 	- 绘制结果：
@@ -456,4 +456,12 @@ gl.drawElements(Mode, Count, Type, Offset)
 	
 	![TRIANGLE_STRIP](./images/1531898437080.png)
 	
-	- 讲解：当使用 `TRIANGLE_FAN` 模式绘制时，
+	- 讲解：当使用 `TRIANGLE_FAN` 模式绘制时，WebGL 会使用索引中的每三个顶点绘制一个三角形。例如在这个示例中，我们使用了 `indices = [0,1,2,3,4]`，所以 WebGL 会使用 (0, 1, 2)、(1, 2, 3)、(2, 3, 4) 绘制三个三角形。
+
+- `TRIANGLE_FAN`
+	- 绘制结果：
+	
+	![TRIANGLE_FAN](./images/1531899518282.png)
+	
+	- 讲解：当使用 `TRIANGLE_FAN` 模式绘制时，WebGL 会使用索引中的第一个顶点作为扇形原点，然后依次读取后面的两个顶点与第一个顶点绘制一个三角形。例如在这个示例中，我们使用了 `indices = [0,1,2,3,4]`，所以 WebGL 会使用 (0, 1, 2)、(0, 3, 4) 绘制两个个三角形。
+
