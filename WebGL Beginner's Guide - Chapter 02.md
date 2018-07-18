@@ -469,8 +469,24 @@ gl.drawElements(Mode, Count, Type, Offset)
 
 在获取渲染管线状态时，我们会用到的函数包括 `getParameter`、`getBufferParameter` 和 `isBuffer`。
 
-和我们在前一章做的类似，我们可以使用 `getParameter(parameter)` 函数，其中参数接受如下值：
+和我们在前一章做的类似，我们可以使用 `getParameter(parameter)` 函数，其中 `parameter` 参数接受如下值：
 
 - `ARRAY_BUFFER_BINDING`：返回当前绑定的 VBO 的引用。
 - `ELEMENT_ARRAY_BUFFER`：返回当前绑定的 IBO 的引用。
+
+另外，我们还可以获取到当前绑定的 VBO 和 IBO 的长度和用途，使用 `getBufferParameter(type, parameter)`。
+
+`type` 参数接受如下值：
+
+- `ARRAY_BUFFER`：指向当前绑定的 VBO。
+- `ELEMENT_ARRAY_BUFFER`：指向当前绑定的 IBO。
+
+ `parameter` 参数接受如下值：
+ 
+ - `BUFFER_SIZE`：返回缓存的在显存中占用的字节数。
+ - `BUFFER_USAGE`：返回缓存的用途。
+
+> 记得在读取渲染管线状态时，一定要确保 VBO 或 IBO 被正确绑定为当前缓存。
+
+最后，`isBuffer(object)` 会返回 `object` 是否是一个合法的 WebGL 缓存，是一个布尔值。和前面两个函数不同，`isBuffer()` 函数不要求 VBO 或 IBO 绑定为当前缓存。
 
