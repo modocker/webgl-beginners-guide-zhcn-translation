@@ -222,6 +222,11 @@ function initBuffers() {
 
 ![Diagram](./attachments/1531809957388.drawio.html)
 
+
+![enter description here](./images/attachments_1531809957388.drawio.png)
+
+
+
 我们可以把步骤总结为：
 
 1. 首先，我们绑定一个 VBO。
