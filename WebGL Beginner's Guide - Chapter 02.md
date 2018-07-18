@@ -36,7 +36,7 @@ Objects（VBOs）。类似的，包含索引数据的缓存被称为 Index Buffe
 ![Diagram](./attachments/1531190440417.drawio.html)
 
 
-![enter description here](./images/attachments_1531190440417_2.drawio.png)
+![WebGL 渲染管线](./images/attachments_1531190440417_2.drawio.png)
 
 
 让我们花一点时间来解释其中的每一个部分。
@@ -57,7 +57,7 @@ VBO 包含 WebGL 所需的描述渲染几何体的信息。就想之前提到的
 ![Diagram](./attachments/1531734136532.drawio.html)
 
 
-![enter description here](./images/attachments_1531734136532.drawio.png)
+![顶点着色器与片元着色器](./images/attachments_1531734136532.drawio.png)
 
 
 
@@ -91,7 +91,7 @@ Varying 用于从顶点着色器向片元着色器中传递数据。
 ![Diagram](./attachments/1531735649842.drawio.html)
 
 
-![enter description here](./images/attachments_1531735649842.drawio.png)
+![顶点与索引](./images/attachments_1531735649842.drawio.png)
 
 
 
@@ -223,7 +223,7 @@ function initBuffers() {
 ![Diagram](./attachments/1531809957388.drawio.html)
 
 
-![enter description here](./images/attachments_1531809957388.drawio.png)
+![将 Attribute 关联到 VBO](./images/attachments_1531809957388.drawio.png)
 
 
 
@@ -283,7 +283,7 @@ gl.enableVertexAttribArray (aVertexPosition);
 ![Diagram](./attachments/1531820750605.drawio.html)
 
 
-![enter description here](./images/attachments_1531820750605.drawio.png)
+![将一个 Attribute 指向当前绑定的 VBO](./images/attachments_1531820750605.drawio.png)
 
 
 
@@ -315,7 +315,7 @@ gl.enableVertexAttribArray (aVertexPosition);
 ![Diagram](./attachments/1531889445721.drawio.html)
 
 
-![enter description here](./images/attachments_1531889445721.drawio.png)
+![使用 drawArray 函数](./images/attachments_1531889445721.drawio.png)
 
 
 `drawArrays` 函数的语法是：
@@ -339,7 +339,7 @@ gl.drawArrays(Mode, First, Count)
 
 让我们重新读一下这张图
 
-![enter description here](./images/attachments_1531735649842_1.drawio.png)
+![顶点与索引](./images/attachments_1531735649842_1.drawio.png)
 
 当我们使用 `drawElements` 的时候，我们需要至少两个缓存，一个是 VBO，另一个是 IBO。顶点着色器将会对 VBO 中的每个顶点运行一次，然后渲染管线会使用 IBO 中的数据组装进三角形。
 
@@ -365,14 +365,14 @@ gl.drawElements(Mode, Count, Type, Offset)
 
 我想你一定急不可耐地想要把这些知识总结道一起了，让我们开始写代码吧！我们来创建一个简单的 WebGL 程序来绘制一个正方形。
 
-1. 让我们看下完整的网页文件代码，完整代码请点击[这里](https://bitbucket.org/dcantor/webgl-beginners-guide-code/src/a27b84e89b926c4a79bcd3c3b566486c53c38ee2/1727_02/ch2_Square.html?at=master&fileviewer=file-view-default)。
+1. 让我们看下完整的网页文件代码，打开 `1727_02/ch2_Square.html`，完整代码请点击[这里](https://bitbucket.org/dcantor/webgl-beginners-guide-code/src/a27b84e89b926c4a79bcd3c3b566486c53c38ee2/1727_02/ch2_Square.html?at=master&fileviewer=file-view-default)。
 
 2. 下面图标解释了这个网页文件的架构。
 
 ![Diagram](./attachments/1531893580256.drawio.html)
 
 
-![enter description here](./images/attachments_1531893580256.drawio.png)
+![WebGL 网页文件结构](./images/attachments_1531893580256.drawio.png)
 
 
 3. 网页包含如下部分：
@@ -390,3 +390,70 @@ gl.drawElements(Mode, Count, Type, Offset)
 4. 找到 `initBuffer` 函数。请注意代码注释中的图示，这个简单的图示描述了顶点和索引是如何组织的。
 
 5. 你可以尝试修改顶点坐标数组和索引数组，试着画一个五边形试试。
+
+### 渲染模式
+
+在我们讲述 `drawArrays` 和 `drawElements` 函数式，里面都提到了 `Mode` 参数，从字面上你可以看出其中包括“点”、“线”、“三角形”等描述，那么它们之间的区别是什么呢？让我们来通过绘制梯形的那个示例来讲解一下。
+
+1. 打开网页文件 `1727_02/ch2_RenderingModes.html`，完整代码点击[这里](https://bitbucket.org/dcantor/webgl-beginners-guide-code/src/a27b84e89b926c4a79bcd3c3b566486c53c38ee2/1727_02/ch2_RenderingModes.html?at=master&fileviewer=file-view-default)。
+
+2. 找到 init Buffer 函数。
+
+3. 运行此网页文件，你可以看到我们绘制的梯形，现在它显示为两个三角形。
+
+4. 在页面底部你可以看到一个下拉框，在其中你可以选择不同的渲染模式。
+
+![1727_02/ch2_RenderingModes.html](./images/1531896611086.png)
+
+5. 当你选择不同的选项时，会修改 `renderingMode` 变量。
+
+6. 你可以查看 `drawScene` 函数来查看不同选项对绘制的影响。
+
+7. 你可以看到，在绑定了梯形的 IBO 之后，根据 `renderingMode` 的不同值，我们写了 `switch` 语句块来向其中传递不同的索引数据，并进行相应的绘制。
+
+8. 在 `switch` 的每个 `case` 中，我们都是先定义了一个 JavaScript 数组用于储存索引值，然后用 `bufferData` 函数将转换为类型化数组的索引值传递到当前绑定的缓存中，然后调用 `drawElements` 函数来进行绘制。
+
+9. 让我们来看下不同渲染模式的区别：
+
+- `TRIANGLES`
+	- 绘制结果：
+
+	![TRIGANLE](./images/1531897129676.png)
+	
+	- 讲解：当使用 `TRIANGLES`模式绘制时，WebGL 会使用索引数组中的前三个顶点绘制第一个三角形，然后使用接下来的三个顶点，绘制第二个三角形，以此类推。在这个示例中，我们根据顶点数组 `indices = [0,1,2,2,3,4] ` 绘制了两个三角形。
+
+- `LINES`
+	- 绘制结果：
+	
+	
+	![LINES](./images/1531897347252.png)
+	
+	- 讲解：当使用 `LINES` 模式绘制时，WebGL 会使用索引数组中的前两个顶点绘制第一条直线，然后使用接下来的两个顶点绘制第二条直线，以此类推。在这个示例中，我们的顶点数组是 `indices = [1,3,0,4,1,2,2,3]`，所以会绘制四条直线，分辨是顶点 1 到 3、0 到 4、1 到 2、2 到 3。
+
+- `POINTS`
+	- 绘制结果：
+	
+	![POINTS](./images/1531897933895.png)
+	
+	- 讲解：当使用 `POINTS` 模式绘制时，WebGL 会使用索引中的每一个顶点绘制一个点。在这个示例中，我们的顶点数组是 `indices = [1,2,3]`，所以我们绘制了三个点。
+
+- `LINE_LOOP`
+	- 绘制结果：
+
+	![LINE_LOOP](./images/1531898077977.png)
+	
+	- 讲解：当使用 `LINE_LOOP` 模式绘制时，WebGL 会使用直线连接索引中的每一个顶点，然后将索引中的最后一个顶点与第一个顶点相连。在这个实例中，我们使用了 `indices = [2,3,4,1,0]`。
+
+- `LINE_STRIP`
+	- 绘制结果：
+	
+	![LINE_STRIP](./images/1531898269260.png)
+	
+	- 讲解：当使用 `LINE_STRIP` 模式绘制时，WebGL 会使用直线连接索引中的每一个顶点，但是**不会**讲索引中的最后一个顶点与第一个顶点相连。在这个示例中，我们使用了和 `LINE_LOOP` 模式完全一样的索引数组，你可以看到最后一个顶点（顶点 0）和第一个顶点（顶点 2）并没有相连。
+
+- `TRIANGLE_STRIP`
+	- 绘制结果：
+	
+	![TRIANGLE_STRIP](./images/1531898437080.png)
+	
+	- 讲解：当使用 `TRIANGLE_FAN` 模式绘制时，
