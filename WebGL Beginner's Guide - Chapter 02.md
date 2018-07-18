@@ -62,7 +62,7 @@ Attribute、Uniform 和 Varying 是着色器编程中三种不同类型的变量
 
 Attribute 是在顶点着色器中使用的输入变量。例如，顶点坐标、顶点颜色等等。因为对于每一个顶点都将会调用顶点着色器，所以每次顶点着色器被调用时，Attribute 都将发生变化。
 
-Uniform 是在顶点着色器和片元着色器中都可以访问的输入变量。和 Attribute 不同，Uniform 在渲染循环中是一个敞亮。例如，灯光的位置。
+Uniform 是在顶点着色器和片元着色器中都可以访问的输入变量。和 Attribute 不同，Uniform 在渲染循环中是一个常量。例如，灯光的位置。
 
 Varying 用于从顶点着色器向片元着色器中传递数据。
 
@@ -120,8 +120,171 @@ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
 > 关于类型化数组（typed array）的标准可以访问： http://www.khronos.org/registry/typedarray/specs/latest/
 
-WebGL 使用的类型化数组包括 `Int8Array`、`Uint8Array`、`Int16Array`、
-`Uint16Array`、`Int32Array`、`UInt32Array`、`Float32Array` 和 `Float64Array`。
+WebGL 使用的类型化数组包括 `Int8Array`、`Uint8Array`、`Int16Array`、`Uint8ClampedArray`、`Int16Array`、`Uint16Array`、`Int32Array`、`Uint32Array`、`Float32Array` 和 `Float64Array`。
 
-通过观察我们可以发现，顶点坐标可以是浮点数，但是索引永远是整型数。因此，在本书中，对于 VBO 我们使用 `Float32Array`，而对于 IBO 我们使用 `Uint16Array`。这两个类型也是你在 WebGL 每次渲染命令中可以使用的最大的类型化数组。
+通过观察我们可以发现，顶点坐标可以是浮点数，但是索引永远是整型数。因此，在本书中，对于 VBO 我们使用 `Float32Array`，而对于 IBO 我们使用 `Uint16Array`。这是因为在本书出版的年代，这两个类型是在 WebGL 每次渲染命令中可以使用的最大的类型化数组。目前（2018年），类型化数组已经得到了普遍的支持。
+
+因为在本书中使用了 16 位的类型化数组来储存索引，所以数组的最大长度被限制在了 65535。也就是说，如果你的几何体的索引数量超过了 65535，那么你需要调用多次渲染命令。我们将在本章稍后讲解这一问题。
+
+> 除了自身图形能力之外，类型化数组是 WebGL 对 Web 额外的巨大贡献之一，正是因为实现 WebGL 才引入的类型化数组，使得 JavaScript 有了灵活处理二进制数据的能力。
+> 
+> 即使在当年微软竭尽全力反对 WebGL 的时候，微软 IE 团队也不得不引入对类型化数组的支持，往事都已成过眼云烟，推荐阅读：http://www.hiwebgl.com/?p=803 。
+> 
+> 另外，类型化数组的标准的拥有者是 WebGL 和 OpenGL 背后的 Khronos Group，而不是 W3C 和 WHATWG。
+
+最后，作为好的习惯，我们再对缓存进行解绑。我们调用如下命令：
+
+``` javascript
+gl.bindBuffer(gl.ARRAY_BUFFER, null);
+```
+
+然后我们对每一个 WebGL 缓存（VBO 和 IBO）多次重复调用相同的函数.
+
+让我们回顾一下我们刚刚学习的示例。我们在 `initBuffers` 函数中建立了 VBO 和 IBO。
+
+``` javascript
+function initBuffers() {
+
+    vertices =[1.5, 0, 0, 
+    -1.5, 1, 0, 
+    -1.5, 0.809017,	0.587785,
+    -1.5, 0.309017,	0.951057, 
+    -1.5, -0.309017, 0.951057, 
+    -1.5, -0.809017, 0.587785,
+    -1.5, -1, 0, 
+    -1.5, -0.809017, -0.587785,
+    -1.5, -0.309017, -0.951057, 
+    -1.5, 0.309017,	-0.951057, 
+    -1.5, 0.809017,	-0.587785];
+
+    indices = [0, 1, 2,
+    0, 2, 3,
+    0, 3, 4,
+    0, 4, 5,
+    0, 5, 6,
+    0, 6, 7,
+    0, 7, 8,
+    0, 8, 9,
+    0, 9, 10,
+    0, 10, 1];
+
+    //The following code snippet creates a vertex buffer and binds data to it
+    coneVertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, coneVertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    
+    
+    coneIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, coneIndexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+    
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ARRAY_BUFFER,null);
+
+}
+```
+
+总结一下，也就是说对于每一个数组缓存，我们做的事情是：
+
+- 创建新缓存
+- 将其绑定称为当前缓存
+- 使用类型化数组将数据传递给缓存
+- 解绑缓存
+
+### 操作 WebGL 缓存
+
+操作 WebGL 缓存的总结如下表：
+
+| 函数方法                                            | 描述                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `var aBuffer = createBuffer(void)`                  | 创建一个名为 `aBuffer` 的缓存                                                                                                                                                                                                                                                                                                                                         |
+| `deleteBuffer(Object aBuffer)`                      | 删除一个名为 `aBuffer` 的缓存                                                                                                                                                                                                                                                                                                                                         |
+| `bindBuffer(ulong target, Object buffer)`           | 绑定一个缓存对象。`target` 参数接受如下的值：<br>- `ARRAY_BUFFER`：用于顶点数组<br>- `ELEMENT_ARRAY_BUFFER`：用于索引数组                                                                                                                                                                                                                                                   |
+| `bufferData(ulong target, Object data, ulong type)` | 向一个缓存对象传值。`target` 参数接受如下的值：<br>- `ARRAY_BUFFER`：用于顶点数组<br>- `ELEMENT_ARRAY_BUFFER`：用于索引数组<br><br>`type` 参数是一个性能相关的参数，接受如下的值：<br>- `STATIC_DRAW`：缓存中的数据不会发生变化（一次传值，多次使用）<br>- `DYNAMIC_DRAW`：数据会频繁发生变化（多次传值，多次使用）<br>- `STREAM_DRAW`：数据在每次渲染循环中都会变化（一次传值，一次使用） |
+
+### 将 Attribute 关联到 VBO
+
+一旦 VBO 建立完毕，我们就可以用顶点着色器的 Attribute 属性将其关联起来。每个顶点着色器的 Attribute 属性都会引用一个并且只会引用一个缓存，它们的对应关系如下图：
+
+![Diagram](./attachments/1531809957388.drawio.html)
+
+我们可以把步骤总结为：
+
+1. 首先，我们绑定一个 VBO。
+2. 接下来，我们将一个 Attribute 指向当前绑定的 VBO。
+3. 最后，我们启用这个 Attribute。
+
+#### 绑定 VBO
+
+我们已经学会如何去做：
+
+``` javascript
+gl.bindBuffer(gl.ARRAY_BUFFER, myBuffer);
+```
+
+其中 `myBuffer` 就是我们想要映射的缓存。
+
+#### 将一个 Attribute 指向当前绑定的 VBO
+
+在下一章中我们将会学习如何定义顶点着色器中的 Attribute，在这里我们先假定我们有一个叫做 `aVertexPosition` 的 Attribute，它在顶点着色器中将会扮演顶点位置的角色。
+
+在 WebGL 中将 Attribute 指向当前绑定的 VBO 的函数是 `vertexAttribPointer`。它的使用方法如下“
+
+``` javascript
+gl.vertexAttribPointer(Index, Size, Type, Normalized, Stride, Offset);
+```
+
+让我们来看下其中的参数：
+
+- `Index`：着色器中 Attribute 变量的索引值。
+- `Size`：每个顶点需要从当前绑定的缓存中多少个值。
+- `Type`：当前缓存中值的数据类型，接受如下的值：
+	- `gl.BYTE`：带符号8位整型数，区间为 \[-128, 127\]。
+	- `gl.SHORT`：带符号的16位整型数，区间为 \[-32768, 32767\]。
+	- `gl.UNSIGNED_BYTE`：不带符号的8位整型数，区间为 \[0, 255\]。
+	- `gl.UNSIGNED_SHORT`：不带符号的16位整型数，区间为 \[0, 65535\]。
+	- `gl.FLOAT`：32位 IEEE 浮点数。
+	- `gl.HALF_FLOAT`：16位 IEEE 浮点数（仅支持 WebGL 2.0）。
+- `Normalized`：布尔值，如果数据类型是整型数，是否需要归一化。对 `gl.BYTE` 和 `gl.SHORT` 类型的值，会归一化为 \[-1, 1\] 区间；对 `gl.UNSIGNED_BYTE` 和 `gl.UNSIGNED_SHORT`，会归一化为 \[0, 1\] 区间；对浮点数类型本参数无效。
+- `Stride`：每个顶点的 Attribute 在 GPU 显存中的储存位移，最大不能超过 255。如果设为 0，则代表每个顶点的 Attribute 会紧凑的相继储存，中间没有其他的数据块，下一个顶点的 Attribute 会紧跟着当前顶点的 Attribute。
+- `Offset`：位移，是指从缓存数组的第几个元素开始读取 Attribute。通常设置为 0，代表从缓存数组的第一个元素开始读取。
+
+> `vertexAttribPointer` 定义了一个从当前绑定的缓存中读取信息的指针。如果没有绑定当前 VBO，则会抛出错误异常。
+
+#### 启用 Attribute
+
+最后，我们只需要激活顶点着色器中的 Attribute。在示例中，我们添加如下代码：
+
+``` javascript
+gl.enableVertexAttribArray (aVertexPosition);
+```
+
+下面的图例解释了 Attribute 和 VBO 之前的映射流程：
+
+![Diagram](./attachments/1531820750605.drawio.html)
+
+### 渲染
+
+当 VBO 第一完成，并且映射到顶点着色器中相应的 Attribute 变量中后，我们就可以开始渲染了。
+
+我们需要用到两个 API 其中之一 —— `drawArrays` 或 `drawElements`。
+
+#### `drawArrays` 和 `drawElements` 函数
+
+`drawArrays` 和 `drawElements` 函数用于向帧缓冲中写入数据。
+
+`drawArrays` 直接使用顶点数据来创建几何体；相对应的，`drawElements` 使用索引数据然后再根据索引获取顶点数据来创建几何体。
+
+`drawArrays` 和 `drawElements` 函数都必须使用使用激活的数组数据，也就是说必须把 VBO 映射到 Attribute 后激活 Attribute。
+
+在我们的示例中，我们只有一个激活的数组数据，即包含顶点坐标的那个数组。其实，在更加普遍的场合下，我们通常都会激活多个数组数据。例如，我们可以将顶点颜色、顶点法线、纹理坐标和其他逐顶点数据都放到映射到 Attribute 的数组中并激活它们。
+
+> 使用多个 VBO
+> 在下一张中，我们将会看到我们如何使用法线数据来创造光照模型。在那个示例中，我们将会使用两个激活的数组数据：顶点坐标和顶点法线。
+
+#### 使用 `drawArrays`
+
+在没有索引数组的情况下，我们将直接使用 `drawArrays` 函数。在更多的情况下，`drawArrays` 经常用于绘制非常简单的几何体，简单到为其创建索引数组反而是多此一举的程度；比如说，当我们想要渲染一个三角形或者一个矩形的时候。在这时，WebGL 会按照 VBO 中定义的顶点坐标去创建几何体。如果你的几何体中含有多个三角形（例如我们之前图示中的梯形），那你可以在 VBO 中重复列出这些顶点坐标。
+
+如果你需要重复太多次顶点坐标，那么使用 `drawArrays` 函数就不是一个好主意了。VBO 中重复的顶点越多，顶点着色器就要越多的运行。这会大大降低程序性能，因为太多相同的顶点多次进入顶点着色器处理，带来不必要的计算量。
 
