@@ -205,7 +205,7 @@ function initBuffers() {
 - 使用类型化数组将数据传递给缓存
 - 解绑缓存
 
-### 操作 WebGL 缓存
+#### 操作 WebGL 缓存
 
 操作 WebGL 缓存的总结如下表：
 
@@ -359,7 +359,15 @@ gl.drawElements(Mode, Count, Type, Offset)
 - `Offset`：指定从哪个元素开始绘制，通常是 0，即第一个元素。
 
 > WebGL 毫无修改的继承了 Open GL ES 2.0 中关于 `drawElements` 的描述：
-> 当 `drawElements` 被调用时，它使用每个激活的数组中的从 `Offset` 开始的 `Count` 个序列元素去构建一个几何基元序列。`Mode` 指定了使用哪种基元去构建，以及如何数组元素如何构建这些基元。如果有多个激活的数组，每个都会被读取。
+> 当 `drawElements` 被调用时，它使用每个激活的数组中的从 `Offset` 开始的 `Count` 个序列元素去构建一个几何基元序列。`Mode` 指定了使用哪种基元去构建，以及如何数组元素如何构建这些基元。如果有多个激活的数组，每个都会被使用。
+
+### 总结到一起
+
+我想你一定急不可耐地想要把这些知识总结道一起了，让我们开始写代码吧！我们来创建一个简单的 WebGL 程序来绘制一个正方形。
+
+1. 让我们看下完整的网页文件代码，完整代码请点击[这里](https://bitbucket.org/dcantor/webgl-beginners-guide-code/src/a27b84e89b926c4a79bcd3c3b566486c53c38ee2/1727_02/ch2_Square.html?at=master&fileviewer=file-view-default)。
+
+2. 下面图标解释了这个网页文件的架构。
 
 
 
