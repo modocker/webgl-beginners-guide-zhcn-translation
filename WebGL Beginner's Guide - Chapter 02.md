@@ -369,6 +369,24 @@ gl.drawElements(Mode, Count, Type, Offset)
 
 2. 下面图标解释了这个网页文件的架构。
 
+![Diagram](./attachments/1531893580256.drawio.html)
 
 
+![enter description here](./images/attachments_1531893580256.drawio.png)
 
+
+3. 网页包含如下部分：
+
+- `<script id="shader-fs" type="x-shader/xfragment">` 标签中包含了片元着色器的代码。
+- `<script id="shader-vs" type="x-shader/x-vertex">` 标签中包含了顶点着色器的代码。我们会在后面学习更多关于着色器的知识。
+- ` <script id="code-js" type="text/javascript">` 标签中包含了所需的全部 WebGL JavaScript 代码。其中包含了如下的程序：
+	- `getGLContext`：和前一章我们看到的函数类似，这个函数用于获取 WebGL 上下文。
+	- `initProgram`：这个函数引用了顶点着色器和片元着色器代码，并将他们传递给 GPU 进行编译。我们稍后会学习。
+	- `initBuffers`：这个函数包含了创建 WebGL 缓存并初始化的 API。在这个示例中我们将创建一个 VBO 来储存正方形的顶点坐标和一个 IBO 来储存绘制正方形所需的索引数组。
+	- `renderLoop`：这个函数用于创建渲染循环。程序将调用这个函数来周期性的更新场景（使用 [`requestAnimationFrame`](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestAnimationFrame) ）
+	- `drawScene`：在这个函数中，我们将 VBO 映射到相应的顶点缓存中的 Attribute，并且启用这个 Attribute；然后绑定 IBO 并调用 `drawElements` 函数。
+	- 最后，我们在 `<body>` 标签中为 `onLoad` 事件添加 `runWebGLApp` 函数。
+
+4. 找到 `initBuffer` 函数。请注意代码注释中的图示，这个简单的图示描述了顶点和索引是如何组织的。
+
+5. 你可以尝试修改顶点坐标数组和索引数组，试着画一个五边形试试。
