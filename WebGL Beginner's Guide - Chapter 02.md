@@ -34,8 +34,9 @@ Objects（VBOs）。类似的，包含索引数据的缓存被称为 Index Buffe
 在这里我们将会看到一个简易版本的 WebGL 渲染管线。在接下来的章节中，我们将会讨论其中的更多细节。
 
 ![Diagram](./attachments/1531190440417.drawio.html)
-
 ![enter description here](./images/attachments_1531190440417_2.drawio.png)
+
+
 让我们花一点时间来解释其中的每一个部分。
 
 ### 顶点缓存（VBO）
