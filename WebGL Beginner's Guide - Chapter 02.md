@@ -56,6 +56,11 @@ VBO 包含 WebGL 所需的描述渲染几何体的信息。就想之前提到的
 
 ![Diagram](./attachments/1531734136532.drawio.html)
 
+
+![enter description here](./images/attachments_1531734136532.drawio.png)
+
+
+
 ### 帧缓冲（Framebuffer）
 帧缓冲是一个二维的缓存，其中储存着经过片元着色器处理过的片元数据。一旦所有片元都被处理完成，一张 2D 图像就被组装完成并呈现在显示器中。
 
