@@ -318,5 +318,19 @@ gl.enableVertexAttribArray (aVertexPosition);
 ![enter description here](./images/attachments_1531889445721.drawio.png)
 
 
+`drawArrays` 函数的语法是：
+
+``` javascript
+gl.drawArrays(Mode, First, Count)
+```
+
+其中：
+
+- ` Mode`：表示将要渲染绘制的基元的类型，可选值为：`gl.POINTS`、`gl.LINE_STRIP`、`gl.LINE_LOOP`、`gl.LINES`、`gl.TRIANGLE_STRIP`、`gl.TRIANGLE_FAN`、`gl.TRIANGLES`。我们将在下一节中详细解释。
+- `First`：指定起始元素。
+- `Count`：指定挥之元素的数量。
+
+> WebGL 标准原文：
+>  当 `drawArrays` 被调用时，它使用每个激活的数组中从第 `First` 个开始的 `Count` 个序列元素去构建一个几何基元序列。
 
 
