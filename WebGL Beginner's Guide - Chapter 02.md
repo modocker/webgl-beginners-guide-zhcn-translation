@@ -328,9 +328,39 @@ gl.drawArrays(Mode, First, Count)
 
 - ` Mode`：表示将要渲染绘制的基元的类型，可选值为：`gl.POINTS`、`gl.LINE_STRIP`、`gl.LINE_LOOP`、`gl.LINES`、`gl.TRIANGLE_STRIP`、`gl.TRIANGLE_FAN`、`gl.TRIANGLES`。我们将在下一节中详细解释。
 - `First`：指定起始元素。
-- `Count`：指定挥之元素的数量。
+- `Count`：指定绘制元素的数量。
 
 > WebGL 标准原文：
->  当 `drawArrays` 被调用时，它使用每个激活的数组中从第 `First` 个开始的 `Count` 个序列元素去构建一个几何基元序列。
+>  当 `drawArrays` 被调用时，它使用每个激活的数组中从第 `First` 个开始的 `Count` 个序列元素去构建一个几何基元序列。`Mode` 指定了使用哪种基元去构建，以及如何数组元素如何构建这些基元。
+
+#### 使用 `drawElements` 函数
+
+与之前没有 IBO 的情况不同，`drawElements` 函数允许我们使用 IBO 去告诉 WebGL 如何渲染几何体。请记住二者的区别，`drawArrays` 使用 VBO，`drawElements` 使用 IBO。对于 `drawArrays` 来说，顶点着色器会根据顶点在 VBO 出现的次数，去重复处理它们；与之不同的是，`drawElements` 使用了索引，因此每个顶点只会被处理一次，但是会根据它们在 IBO 中定义的次数，被多次复用。这个特性降低了 GPU 的性能消耗和显存消耗。
+
+让我们重新读一下这张图
+
+![enter description here](./images/attachments_1531735649842_1.drawio.png)
+
+当我们使用 `drawElements` 的时候，我们需要至少两个缓存，一个是 VBO，另一个是 IBO。顶点着色器将会对 VBO 中的每个顶点运行一次，然后渲染管线会使用 IBO 中的数据组装进三角形。
+
+> 当使用 `drawElements` 的时候，记得确保与 VBO 对应的 IBO 被正确绑定。
+
+`drawElements` 函数的语法为：
+
+``` javascript
+gl.drawElements(Mode, Count, Type, Offset)
+```
+
+其中：
+
+- `Mode`：表示将要渲染绘制的基元的类型，可选值为：`POINTS`、`LINE_STRIP`、`LINE_LOOP`、`LINES`、`TRIANGLE_STRIP`、`TRIANGLE_FAN`、`TRIANGLES`。
+- `Count`：指定绘制元素的数量。
+- `Type`：指定索引中的数据类型，因为索引数据都是正整数，所以必须是 `UNSIGNED_BYTE` 或 `UNSIGNED_SHORT`。
+- `Offset`：指定从哪个元素开始绘制，通常是 0，即第一个元素。
+
+> WebGL 毫无修改的继承了 Open GL ES 2.0 中关于 `drawElements` 的描述：
+> 当 `drawElements` 被调用时，它使用每个激活的数组中的从 `Offset` 开始的 `Count` 个序列元素去构建一个几何基元序列。`Mode` 指定了使用哪种基元去构建，以及如何数组元素如何构建这些基元。如果有多个激活的数组，每个都会被读取。
+
+
 
 
