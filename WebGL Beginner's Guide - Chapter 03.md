@@ -44,9 +44,13 @@ grammar_cjkRuby: true
 
 我们使用叉积来计算法线。
 
+![叉积](./images/1531980234541.png)
+
 > 叉积称为向量积，是向量的一种二元运算，在空间上代表与向量 $\vec a$ 和向量 $\vec b$ 都垂直的向量。
 > $$\vec a \times \vec b = \vert \vec a \vert \vert \vec b \vert \sin (\theta) \vec n $$
 > 其中 $\theta$  表示 $\vec a$ 和 $\vec b$ 在它们所定义的平面上的夹角（ $0° \le \theta \le 180°$）。$\vert \vec a \vert$ 和 $\vert \vec b \vert$ 表示向量的模长，而 $\vec n$ 则是一个与 $\vec a$、$\vec b$ 所构成的平面垂直的单位向量，方向由右手定则决定。
+
+让我们来详细讲述下。假设我们有三角形，其顶点为 `p0`、`p1`、`p2`，然后我们定义向量 `v1` = `p1` - `p0`，向量 `v2` = `p2` - `p0`。那么三角形所在平面的法线就是向量 `v1` 和 `v2` 的叉积。用向量空间图像表示如下：
 
 
 
