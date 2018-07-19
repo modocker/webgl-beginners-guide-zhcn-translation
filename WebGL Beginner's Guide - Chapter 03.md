@@ -45,6 +45,7 @@ grammar_cjkRuby: true
 我们使用叉积来计算法线。
 
 > 叉积称为向量积，是向量的一种二元运算，在空间上代表与向量 $\vec a$ 和向量 $\vec b$ 都垂直的向量。
-> $$\vec a \times \vec b = \Vert \vec a \Vert \Vert \vec b \Vert \sin \theta $$
+> $$\vec a \times \vec b = \Vert \vec a \Vert \Vert \vec b \Vert \sin (\theta) n $$
+> 其中 $\theta$  表示 $\vec a$ 和 $\vec b$ 在它们所定义的平面上的夹角（ $0° \le \theta \le 180°$）。$\vert \vec a \vert$ 和 $\vert \vec b \vert$ 表示向量的模长，而 $n$ 则是一个与 $\vec a$、$\vec b$ 所构成的平面垂直的单位向量，方向由右手定则决定。
 
 
