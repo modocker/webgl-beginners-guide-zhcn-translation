@@ -94,3 +94,9 @@ grammar_cjkRuby: true
 
 另一方面，所有运行的顶点着色器都会接收到相同的 Unifrom。在每次绘制命令中，Uniform 可以被视作常量。
 
+![Diagram](./attachments/1531989973554.drawio.html)
+
+
+![顶点着色器中的并行处理](./images/attachments_1531989973554.drawio.png)
+
+
