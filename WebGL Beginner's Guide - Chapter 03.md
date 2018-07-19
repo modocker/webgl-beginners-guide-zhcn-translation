@@ -74,4 +74,20 @@ grammar_cjkRuby: true
 
 ## 在渲染管线中使用光照、法线和材质
 
-我们曾在第二章中提到过，WebGL 缓存、Attribute 和 Uniform 都是着色器中的输入变量，而 Varyings 则是用于从顶点着色器向片元着色器输送数据。让我们重新回顾一下渲染管线，来看看如何在其中嵌入光照、法线和材质
+我们曾在第二章中提到过，WebGL 缓存、Attribute 和 Uniform 都是着色器中的输入变量，而 Varyings 则是用于从顶点着色器向片元着色器输送数据。让我们重新回顾一下渲染管线，来看看如何在其中嵌入光照、法线和材质。
+
+![Diagram](./attachments/1531985582781.drawio.html)
+
+
+![WebGL 渲染管线](./images/attachments_1531985582781.drawio.png)
+
+
+法线是一个逐顶点属性，所以在 WebGL 中是作为 VBO 映射到 Attribute 中的。请注意 Attribute 是不能输入到片元着色器中的。
+
+光照和材质是作为 Uniform 传入的。Uniform 是在顶点着色器和片元着色器中都可以访问的。这就给与了我们计算光照模型充分的自由度，因为我们既可以在顶点着色器中计算逐顶点的光照，也可以在片元着色器中计算逐片元的光照。
+
+> 在 WebGL 中，顶点着色器和片元着色器结合在一起被称为着色器程序 Program。
+
+### 并行计算以及 Attribute 和 Uniform 之间的区别
+
+区分 Attribute 和 Uniform 是一件非常重要的是。当调用绘制命令时（使用 `drawArrays` 或 `drawElements`），GPU 将会对顶点着色器进行并行计算。
