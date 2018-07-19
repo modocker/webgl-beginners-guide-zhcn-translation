@@ -90,4 +90,7 @@ grammar_cjkRuby: true
 
 ### 并行计算以及 Attribute 和 Uniform 之间的区别
 
-区分 Attribute 和 Uniform 是一件非常重要的是。当调用绘制命令时（使用 `drawArrays` 或 `drawElements`），GPU 将会对顶点着色器进行并行计算。
+区分 Attribute 和 Uniform 是一件非常重要的是。当调用绘制命令时（使用 `drawArrays` 或 `drawElements`），GPU 将会并行运行多份顶点着色器，每份顶点着色器都会接收到不同的 Attribute 值。这些 Attribute 值来自于与之对应的 VBO。
+
+另一方面，所有运行的顶点着色器都会接收到相同的 Unifrom。在每次绘制命令中，Uniform 可以被视作常量。
+
