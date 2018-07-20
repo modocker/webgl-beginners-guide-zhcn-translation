@@ -197,3 +197,90 @@ OpenGL ES Shading Language（ESSL）是用于编写着色器的语言。它的�
 
 ### 数据类型
 
+ESSL 提供如下基本的数据类型：
+
+- `void`：用于没有返回值或者参数列表为空的函数。
+- `bool`：条件类型，取值为 `true` 或 `false`。
+- `int`：带符号的整型数。
+- `float`：单精度浮点数，标量。
+- `vec2`：二维浮点向量。
+- `vec3`：三维浮点向量。
+- `vec4`：四维浮点向量。
+- `bvec2`：二维布尔向量。
+- `bvec3`：三维布尔向量。
+- `bvec4`：四维布尔向量。
+- `ivec2`：二维整数向量。
+- `ivec3`：三维整数向量。
+- `ivec4`：四维整数向量。
+- `mat2`：2x2 浮点矩阵。
+- `mat3`：3x3 浮点矩阵。
+- `mat4`：4x4 浮点矩阵。
+- `sampler2D`：用于访问 2D 纹理。
+- `samplerCube`：用于访问 cube map 纹理。
+
+所以声明一个变量需要先写三种储存修饰符中的一种，再写数据类型，再写变量名。例如我们可以这么声明一个 varying 颜色变量：
+
+``` glsl
+varying vec4 vFinalColor;
+```
+
+这意味着 `vFinalColor` 是一个 varying 四维向量。
+
+### 向量的分量
+
+> n 个有顺序的数 a0, a1, a2, ... an 组成的有序数组称为一个 n 维向量，其中 a0, a1, a2, ... an 称为向量的**分量**。
+
+在 ESSL 中，我们可以通过下标访问向量的每个分量。
+
+例如：
+
+`vFinalColor[3]` 指的是向量 `vFinalColor` 的第四个分量。向量的下标索引是从 0 开始的。
+
+同时，你也可以使用字母来访问向量的分量
+
+| 形式 | 常用用途 |
+| -------------- | -------------------------------- |
+| `{x, y, z, w}` | 用于访问代表坐标或其他向量的向量 |
+| `{r, g, b, a}` | 用于访问代表颜色的向量           |
+| `{s, t, p, q}` | 用于访问代表纹理坐标的向量       |
+
+比如说，如果我们用一个四维向量代表 RGBa 色彩空间的红色、绿色、蓝色和 alpha 值，我们可以这么设定其 alpha 为 1。
+
+``` glsl
+vFinalColor[3] = 1.0;
+```
+
+或者
+
+``` glsl
+vFinalColor.a = 1.0;
+```
+
+当然，如果愿意的话，我们也可以写成：
+
+``` glsl
+vFinalColor.w = 1.0;
+```
+
+这三种方法都可以访问向量的第四个元素。然而，由于 `vFinalColor` 是代表一个颜色，所以使用 `{r, g, b, a }` 的访问方式是更合理的方式，它会让代码更加易读。
+
+同时，也可以使用字母引用来生成向量的子集（详情参考 [GLSL ES 标准第 44 页](https://www.khronos.org/files/opengles_shading_language.pdf)）：
+
+``` glsl
+vec4 v4;
+ v4.rgba; // is a vec4 and the same as just using v4,
+ v4.rgb; // is a vec3,
+ v4.b; // is a float,
+ v4.xy; // is a vec2,
+ v4.xgba; // is illegal - the component names do not come from
+ // the same set.
+```
+
+### 操作符与函数
+
+ESSL 也提供了很多有用的操作符和函数来简化矢量和矩阵的数学运算。根据 ESSL 标准：
+
+
+
+
+
