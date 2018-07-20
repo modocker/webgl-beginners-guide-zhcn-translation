@@ -183,6 +183,17 @@ grammar_cjkRuby: true
 
 OpenGL ES Shading Language（ESSL）是用于编写着色器的语言。它的语法和风格和 C/C++ 很像。但是它其中内置了数据类型和函数，让开发者可以更轻松方便地操控向量和矩阵。在这一章节，我们将会学习 ESSL 的基础知识。
 
-本章节是 GLSL ES 标准的一个总结。 ESSL 是 GLSL（OpenGL Shading Language）的一个子集。
-完整标准原文链接：https://www.khronos.org/files/opengles_shading_language.pdf
+> 本章节是 GLSL ES 标准的一个小结。 ESSL 是 GLSL（OpenGL Shading Language）的一个子集。
+> 完整标准原文链接：https://www.khronos.org/files/opengles_shading_language.pdf
+
+### 储存修饰符
+
+在声明变量前必须添加储存修饰符，以指定变量的储存方式：
+
+- `atrribute`：连接 WebGL 应用和顶点着色器的逐顶点数据。此修饰符只能用于顶点着色器。
+- `uniform`：连接 WebGL 应用和着色器的数据，在处理过程中不会发生变化。此修饰符既可以在顶点着色器中使用，也可以在片元着色器中使用。如果在两个着色器中都需要用到同一个 uniform，那么声明必须相同。
+- `varying`：连接顶点着色器和片元着色器的插值数据。varying 变量是由顶点着色器和片元着色器共享的，所以声明必须相同。
+- `const`：编译时常量，或者作为只读的函数参数，可以在 ESSL 程序的所有地方调用。
+
+### 数据类型
 
