@@ -272,8 +272,7 @@ vec4 v4;
  v4.rgb; // is a vec3,
  v4.b; // is a float,
  v4.xy; // is a vec2,
- v4.xgba; // is illegal - the component names do not come from
- // the same set.
+ v4.xgba; // is illegal - the component names do not come from the same set.
 ```
 
 ### 操作符与函数
