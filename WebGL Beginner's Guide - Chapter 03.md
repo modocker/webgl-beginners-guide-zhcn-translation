@@ -16,7 +16,7 @@ grammar_cjkRuby: true
 - 学习着色和光照的区别。
 - 使用高洛德着色法（Goraud Shading）和冯氏着色法（Phong Shading），以及兰伯特光照模型（Lambertian Lighting Model）和冯氏光照模型（Phong Lighting Model）。
 - 定义并使用 Uniform、Attribute 和 Varying 变量。
-- 使用 WebGL 的着色器语言 GLSL/ESSL。
+- 使用 WebGL 的着色器语言 ESSL。
 - 讨论与着色器相关的 WebGL API。
 - 继续我们关于 WebGL 作为状态机的工作原理，讨论如何设置与着色器相关的 Attribute 并读取它们的状态。
 
@@ -177,4 +177,12 @@ grammar_cjkRuby: true
 
 环境光、漫反射光和高光相加，最终得出片元的最终颜色。
 
+接下来让我们来学习一下如何在顶点着色器和片元着色器中实现着色的语言，这就是 ESSL 语言。
+
+## ESSL —— OpenGL ES Shading Language
+
+OpenGL ES Shading Language（ESSL）是用于编写着色器的语言。它的语法和风格和 C/C++ 很像。但是它其中内置了数据类型和函数，让开发者可以更轻松方便地操控向量和矩阵。在这一章节，我们将会学习 ESSL 的基础知识。
+
+本章节是 GLSL ES 标准的一个总结。 ESSL 是 GLSL（OpenGL Shading Language）的一个子集。
+完整标准原文链接：https://www.khronos.org/files/opengles_shading_language.pdf
 
