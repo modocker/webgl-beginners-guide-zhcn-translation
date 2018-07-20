@@ -262,7 +262,7 @@ vFinalColor.a = 1.0;
 vFinalColor.w = 1.0;
 ```
 
-这三种方法都可以访问向量的第四个元素。然而，由于 `vFinalColor` 是代表一个颜色，所以使用 `{r, g, b, a }` 的访问方式是更合理的方式，它会让代码更加易读。
+这三种方法都可以访问向量的第四个分量。然而，由于 `vFinalColor` 是代表一个颜色，所以使用 `{r, g, b, a }` 的访问方式是更合理的方式，它会让代码更加易读。
 
 同时，也可以使用字母引用来生成向量的子集（详情参考 [GLSL ES 标准第 44 页](https://www.khronos.org/files/opengles_shading_language.pdf)）：
 
