@@ -275,14 +275,107 @@ vec4 v4;
  v4.xgba; // is illegal - the component names do not come from the same set.
 ```
 
-### 操作符与函数
+### 运算符与函数
 
-ESSL 也提供了很多有用的操作符和函数来简化矢量和矩阵的数学运算。根据 ESSL 标准：二元算数操作符加（`+`）、减（`-`）、乘（`*`）、除（`/`）可以操作包括整形术和浮点数类型的表达式（包括向量和矩阵）。操作符两端必须是同一种数据类型的表达式，或者一端是浮点数标量另一端是浮点向量或矩阵，或者一端是整型数标量另一端是整型数向量。另外，对于乘法（`*`），一端可以是向量另一端可以是与向量维数相同的矩阵。运算结果的基本数据类型（整型数或浮点数）与进行运算的表达式相同。如果一端是标量另一端是向量或矩阵，那么向量或矩阵的每个元素都会与这个标量相乘，最终结果的基本数据类型与向量或矩阵相同。用 0 做除数不会导致异常，但是结果不可预测。
+ESSL 也提供了很多有用的运算符和函数来简化矢量和矩阵的数学运算。根据 ESSL 标准：二元算数运算符加（`+`）、减（`-`）、乘（`*`）、除（`/`）可以操作包括整形术和浮点数类型的表达式（包括向量和矩阵）。运算符两端必须是同一种数据类型的表达式，或者一端是浮点数标量另一端是浮点向量或矩阵，或者一端是整型数标量另一端是整型数向量。另外，对于乘法（`*`），一端可以是向量另一端可以是与向量维数相同的矩阵。运算结果的基本数据类型（整型数或浮点数）与进行运算的表达式相同。如果一端是标量另一端是向量或矩阵，那么向量或矩阵的每个元素都会与这个标量相乘，最终结果的基本数据类型与向量或矩阵相同。用 0 做除数不会导致异常，但是结果不可预测。
 
 - `-x`：向量 `x` 取反。也就是与 `x` 向量方向相反的向量。
 - `x + y`：向量 `x` 和向量 `y` 的和。两个向量必须维数相同。
 - `x - y`：向量 `x` 和向量 `y` 的差。两个向量必须维数相同。
-- `x * y`：如果 `x` 和 `y` 都是向量，那么将会对向量的每个分量进行乘法运算；如果两者都是矩阵，那么将会返回
+- `x * y`：如果 `x` 和 `y` 都是向量，那么将会对向量的每个分量进行乘法运算；如果两者都是矩阵，那么将会计算线性代数意义上的矩阵乘法，而不是将矩阵的每个对位元素相乘（如果你想让矩阵的每个对位元素相乘，应该使用 `matrixCompMult()` 函数）。
+- `x / y`：除法运算符和乘法运算符类似。
+- `dot(x, y)`：返回两个向量的点积。两个向量必须维数相同。
+- `cross(vec3 x, vec3 y)`：返回两个向量的叉积。两个向量必须是三维向量。
+- `matrixCompMult(mat x, mat y)`：将两个矩阵的每个对位元素相乘。两个矩阵必须维数相同（都是 `mat2`、`mat3` 或 `mat4`）。
+- `normalize(x)`：将向量归一化，即返回相同方向但模长为 1 的向量。
+- `reflect(t, n)`：返回入射向量 `t` 关于法向量 `n` 的 镜面反射向量。
 
+另外还有很多三角函数和指数函数。我们会在用到的时候进行讲解。
 
+让我们现在来看一个简单的 ESSL 着色器程序的例子，它包含以下特性：
 
+- 兰伯特反射模型：我们将会使用一个光源在场景进行漫反射计算。也就是说我们将使用 uniform 变量来定义光源的属性、材质属性，然后遵循兰伯特余弦定律来计算每个顶点的最终颜色。
+- 高洛德着色法：我们将对顶点颜色进行插值获得每个片元的最终颜色，使用 varying 变量传入片元着色器。
+
+让我们先来剖析一下 Attribute、Uniform 和 Varying 变量。
+
+### 顶点着色器中的 Attribute
+
+我们先从在顶点着色器中定义的两个 Attribute 变量开始。每个顶点都会有：
+
+``` glsl
+attribute vec3 aVertexPosition;
+attribute vec3 aVertexNormal;
+```
+
+在关键词 `attribute` 右侧，我们可以看到变量的数据类型。在这个例子中，每个顶点的坐标都是由 (x, y, z) 三个坐标组成的，因此是 `vec3`。类似的，顶点法线也是由三个元素 (x, y, z) 组成的空间向量代表，所以也是 `vec3`。注意，虽然顶点坐标和顶点法线都是 `vec3`，但是它们代表的空间几何意义完全不同，顶点坐标是指三维空间中的一个点，而顶点法线是指几何体表面朝向的空间向量。
+
+另外，请记住 Attribute 只能用于顶点着色器。
+
+### Uniform
+
+Uniform 在顶点着色器和片元着色器中都可以使用。每次顶点着色器运行的时候 Attribute 的值都不一样（顶点是并行处理的，每份顶点着色器处理各自不同的顶点），而 Uniform 的值在一个渲染循环中是固定的，即每次 WebGL 调用 `drawArrays` 和 `drawElements` 期间。
+
+因此利用这个特性，我们可以使用 Uniform 传递光源（例如漫反射颜色、方向等）和材质（例如漫反射颜色、光泽度等）的信息。
+
+举例来说：
+
+``` glsl
+uniform vec3 uLightDirection; //incoming light source direction
+uniform vec4 uLightDiffuse; //light diffuse component
+uniform vec4 uMaterialDiffuse; //material diffuse color
+```
+
+和之前一样，在这里 `uniform` 关键字告诉我们这些变量是以 Uniform 的形式储存的，`vec3` 和 `vec4` 则是 ESSL 中的数据结构。在这个例子中，颜色值是由 RGBa 色彩空间的红色、绿色、蓝色以及 alpha 通道组成的，所以是 `vec4`；而光照方向是一个由 (x, y, z) 组成的空间向量所代表，也就是说光线将沿着这个向量的方向朝场景射来，所以是 `vec3`。
+
+### Varying
+
+我们需要把顶点颜色从顶点着色器传递到片元着色器：
+
+``` glsl
+varying vec4 vFinalColor;
+```
+
+Varying 变量声明的方式和前两者类似，但必须在顶点着色器和片元着色器中相匹配。
+
+下面让我们将 Attribute、Uniform、Varying 变量组合在一起，看看着色器代码是什么样的。
+
+### 顶点着色器
+
+下面就是一段顶点着色器的代码。首先我们定义了需要用到的 Attribute、Uniform、Varying 变量，其中还有一些矩阵，我们稍后会讨论到。同时，我们还可以看到顶点着色器有一个主函数，它不接受任何参数并返回 `void`。在其中，我们可以看到一些 ESSL 函数例如归一化和点乘，还有一些算数运算符。
+
+``` glsl
+attribute vec3 aVertexPosition;
+attribute vec3 aVertexNormal;
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
+uniform mat4 uNMatrix;
+uniform vec3 uLightDirection;
+uniform vec4 uLightDiffuse;
+uniform vec4 uMaterialDiffuse;
+varying vec4 vFinalColor;
+
+void main(void) {
+
+ vec3 N = normalize(vec3(uNMatrix * vec4(aVertexNormal, 1.0)));
+ vec3 L = normalize(uLightDirection);
+
+ float lambertTerm = dot(N,-L);
+
+ vFinalColor = uMaterialDiffuse * uLightDiffuse * lambertTerm;
+ vFinalColor.a = 1.0;
+
+gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+
+}
+```
+
+下面这三个是我们还没有讨论到的矩阵：
+
+``` glsl
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
+uniform mat4 uNMatrix;
+```
+
+我们可以看到这三个 Uniform 都是 4x4 的矩阵。这些矩阵是当我们移动相机视角时，顶点着色器计算顶点位置和法线所必须的。这里有一个
