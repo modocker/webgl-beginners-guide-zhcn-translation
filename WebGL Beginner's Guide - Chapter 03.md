@@ -585,12 +585,30 @@ void main(void) {
 
 ![负的兰伯特系数](./images/attachments_1532590597882.drawio.png)
 
-因此我们使用了 ESSL 中的 `clamp()` 函数来限制点积为正值。如果计算出来的点积是负值，`clamp()` 函数将会将兰伯特系数设置为 0，相对应的漫反射将会被忽略，以保证最终正确的光照效果。
+因此我们使用了 ESSL 中的 `clamp()` 函数来限制点积为正值。如果计算出来的点积是负值，`clamp()` 函数将会将兰伯特系数设置为 0，相对应的漫反射将会被忽略，在这种情况下我们只能看到环境光对场景的影响。
 
 `clamp()` 函数的语法为：
 
 `clmap(x, minVal, maxVal)`
 
 它的意思是，将用 `x` 与 `minVal` 对比，取最大值；然后用该值与 `maxVal` 对比取最小值，然后返回该最小值，以此实现将 `x` 限制在 `minVal` 到 `maxVal` 的区间之内的效果。换言之，它实际是 `min(max(x, minVal), maxVal)` 的语法糖。
+
+因为我们仍在使用高洛德插值，所以片元着色器的代码没有变化。
+
+``` glsl
+#ifdef GL_ES
+precision highp float;
+#endif
+
+varying vec4 vFinalColor;
+
+void main(void)
+{
+
+	gl_FragColor = vFinalColor;
+ 
+} 
+```
+
 
 
