@@ -513,7 +513,7 @@ void main(void)  {
 基于我们队冯氏反射模型的认识，我们可以这样计算高光系数：
 
 ``` glsl
-float specular = pow(max(dot(R, E), 0.0), f );
+float specular = pow(max(dot(R, E), 0.0), f);
 ```
 
 其中：
@@ -536,6 +536,53 @@ R = reflect(L, N)
 
 顶点着色器：
 
+``` glsl
+attribute vec3 aVertexPosition;
+attribute vec3 aVertexNormal;
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
+uniform mat4 uNMatrix;
+uniform float uShininess;
+uniform vec3 uLightDirection;
+uniform vec4 uLightAmbient;
+uniform vec4 uLightDiffuse;
+uniform vec4 uLightSpecular;
+uniform vec4 uMaterialAmbient;
+uniform vec4 uMaterialDiffuse;
+uniform vec4 uMaterialSpecular;
+varying vec4 vFinalColor;
 
+void main(void) {
+
+	vec4 vertex = uMVMatrix * vec4(aVertexPosition, 1.0);
+
+	vec3 N = vec3(uNMatrix * vec4(aVertexNormal, 1.0));
+	vec3 L = normalize(uLightDirection);
+	float lambertTerm = clamp(dot(N,-L),0.0,1.0);
+	vec4 Ia = uLightAmbient * uMaterialAmbient;
+	vec4 Id = vec4(0.0,0.0,0.0,1.0);
+	vec4 Is = vec4(0.0,0.0,0.0,1.0);
+
+	Id = uLightDiffuse* uMaterialDiffuse * lambertTerm;
+
+	vec3 eyeVec = -vec3(vertex.xyz);
+	vec3 E = normalize(eyeVec);
+	vec3 R = reflect(L, N);
+	float specular = pow(max(dot(R, E), 0.0), uShininess );
+	Is = uLightSpecular * uMaterialSpecular * specular;
+
+	vFinalColor = Ia + Id + Is;
+	vFinalColor.a = 1.0;
+	gl_Position = uPMatrix * vertex;
+	
+}
+```
+
+当物体是凹陷的或者物体处于光源和视线之间的时候，我们会得到一个负的兰伯特系数，这是因为在这两种情况下，光线方向向量取反后，与法线向量行程了一个钝角，所以最后会得到一个负的点积，如下图所示：
+
+![Diagram](./attachments/1532590597882.drawio.html)
+
+
+![负的兰伯特系数](./images/attachments_1532590597882.drawio.png)
 
 
