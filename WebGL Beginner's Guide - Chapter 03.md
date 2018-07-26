@@ -610,5 +610,101 @@ void main(void)
 } 
 ```
 
+在本小节中，无论我们使用的哪种反射模型，我们都是在顶点着色器中计算出顶点颜色，然后将顶点颜色进行插值获取片元颜色的，这就是所谓的高洛德插值着色方法。接下来让我们将这一过程移到片元着色器，来看看如何实现冯氏插值方法。
 
+## 冯氏着色法
+
+和高洛德插值只计算每个顶点的最终颜色不同的是，冯氏插值会计算每个片元的最终颜色。这也就是说，冯氏反射模型中的环境光、漫反射和高光参数都会移步到片元着色器中计算，而不是顶点着色器。你可以想象一下，相比之前我们的几个场景来说，它的计算更为复杂。然而，我们会获得一个更加真实的场景效果。
+
+那么我们需要在顶点着色器中做些什么呢？好吧，在这个示例中，我们将会把所有需要用于计算的数据，都通过 Varying 变量的形式输送到片元着色器。想想之前法线的例子。
+
+在之前我们只是为每个顶点计算出法线，而现在通过插值我们可以获得每个片元的法线，所以我们就可以针对每个片元计算它们各自的兰伯特系数。我们将顶点法线通过 Varying 变量输送到片元着色器插值来实现这个目的。尽管如此，实际上代码非常简单。所有我们需要知道的就是，创建一个 Varying 变量来储存顶点法线，然后在片元着色器中获取插值。OK，完成了！
+
+![Diagram](./attachments/1532594079596.drawio.html)
+
+
+![逐片元（像素）着色](./images/attachments_1532594079596.drawio.png)
+
+
+现在让我们来看一下冯氏着色法下的顶点着色器代码：
+
+``` glsl
+attribute vec3 aVertexPosition;
+attribute vec3 aVertexNormal;
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
+uniform mat4 uNMatrix;
+varying vec3 vNormal;
+varying vec3 vEyeVec;
+
+void main(void) {
+
+	 vec4 vertex = uMVMatrix * vec4(aVertexPosition, 1.0);
+	 vNormal = vec3(uNMatrix * vec4(aVertexNormal, 1.0));
+	 vEyeVec = -vec3(vertex.xyz);
+	 gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+	 
+}
+```
+
+和高洛德插值不同的是，顶点着色器的代码看起来很简单了。我们没有计算最终颜色，只是用 Varying 变量将两个数据输送到片元着色器。而片元着色器则看起来要复杂多了。
+
+``` glsl
+uniform float uShininess;
+uniform vec3 uLightDirection;
+uniform vec4 uLightAmbient;
+uniform vec4 uLightDiffuse;
+uniform vec4 uLightSpecular;
+uniform vec4 uMaterialAmbient;
+uniform vec4 uMaterialDiffuse;
+uniform vec4 uMaterialSpecular;
+varying vec3 vNormal;
+varying vec3 vEyeVec;
+
+void main(void)
+{
+
+	 vec3 L = normalize(uLightDirection);
+	 vec3 N = normalize(vNormal);
+	 float lambertTerm = dot(N,-L);
+	 vec4 Ia = uLightAmbient * uMaterialAmbient;
+	 vec4 Id = vec4(0.0,0.0,0.0,1.0);
+	 vec4 Is = vec4(0.0,0.0,0.0,1.0);
+	 if(lambertTerm > 0.0)
+	 {
+		 Id = uLightDiffuse * uMaterialDiffuse * lambertTerm;
+
+		 vec3 E = normalize(vEyeVec);
+		 vec3 R = reflect(L, N);
+		 float specular = pow( max(dot(R, E), 0.0), uShininess);
+
+		 Is = uLightSpecular * uMaterialSpecular * specular;
+	 }
+	 vec4 finalColor = Ia + Id + Is;
+	 finalColor.a = 1.0;
+	 gl_FragColor = finalColor;
+	 
+}
+```
+
+当我们使用 Varying 变量传输向量时，有可能在插值的过程中丢失归一化特性，因此你可以看到我们在使用 `vNormal` 和 `vEyeVec` 前都对它们进行了归一化处理。
+
+## 返回 WebGL
+
+是时候让我们重返 JavaScript 代码了。现在我们该如何关闭 JavaScript 代码和 ESSL 代码的缝隙呢？
+
+首先让我们看下我们是如何使用 WebGL 上下文创建着色器程序的。请记住，我们把顶点着色器和片元着色器统称为着色器程序（Program）。
+
+其次，我们需要知道如何初始化 Attribute 和 Uniform 变量。
+
+让我们先来看下我们的网页应用的架构：
+
+![Diagram](./attachments/1532596786426.drawio.html)
+
+
+![网页应用架构](./images/attachments_1532596786426.drawio.png)
+
+网页文件中都先被嵌入了顶点着色器和片元着色器的代码，然后我们在 `<script>` 标签中写所有 WebGL 的代码，最后是 HTML 代码来定义页面元素，例如标题、控件位置，以及 `<canvas>` 画布。
+
+在 JavaScript 代码中，我们在网页触发 `onload` 事件时调用 `runWebApp()` 函数。这是我们的网页应用的入口。而 `runWebApp()` 函数干的第一件事就是为 `<canvas>` 画布获取 WebGL 上下文，然后调用了一些列函数来初始化着色器程序、WebGL 缓存和灯光。最后进入渲染循环，每次渲染循环都会调用 `drawScene()` 函数。在这一章节中，我们将会详细研究 `initProgram()` 函数和 `initLights()` 函数。前者用于创建并编译 ESSL 着色器程序，后者则是用于初始化光照，并将相关数据赋值给着色器程序中定义的 Uniform 变量。在 `initLights()` 函数中，我们将会定义光源的位置、方向和颜色相关的属性（环境光、漫反射和高光），同时我们还会给材质的相关属性赋一个默认值。
 
