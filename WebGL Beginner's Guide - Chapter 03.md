@@ -708,3 +708,53 @@ void main(void)
 
 在 JavaScript 代码中，我们在网页触发 `onload` 事件时调用 `runWebApp()` 函数。这是我们的网页应用的入口。而 `runWebApp()` 函数干的第一件事就是为 `<canvas>` 画布获取 WebGL 上下文，然后调用了一些列函数来初始化着色器程序、WebGL 缓存和灯光。最后进入渲染循环，每次渲染循环都会调用 `drawScene()` 函数。在这一章节中，我们将会详细研究 `initProgram()` 函数和 `initLights()` 函数。前者用于创建并编译 ESSL 着色器程序，后者则是用于初始化光照，并将相关数据赋值给着色器程序中定义的 Uniform 变量。在 `initLights()` 函数中，我们将会定义光源的位置、方向和颜色相关的属性（环境光、漫反射和高光），同时我们还会给材质的相关属性赋一个默认值。
 
+### 创建着色器程序
+
+让我们一步步的来看 `initProgram()` 函数：
+
+``` javascript
+var prg; //global variable
+function initProgram() {
+```
+
+首先我们使用了工具函数 `utils.getShader(WebGLContext, DOM_ID)` 来获取顶点着色器和片元着色器的源代码。
+
+``` javascript
+ var fragmentShader= utils.getShader(gl, "shader-fs");
+ var vertexShader= utils.getShader(gl, "shader-vs");
+```
+
+在这里我们花点时间来讲解一下 `getShader()` 这个函数。这个函数的第一个参数是 WebGL 上下文。第二个参数是包含着色器源代码的 `<script>` 标签的 DOM id。在内部，`getShader()` 函数将会读取脚本标签中的内容，并把它储存在名为 `str` 的本地变量中。然后会执行下列语句：
+
+``` javascript
+var shader;
+ if (script.type == "x-shader/x-fragment") {
+ 	shader = gl.createShader(gl.FRAGMENT_SHADER);
+ } else if (script.type == "x-shader/x-vertex") {
+ 	shader = gl.createShader(gl.VERTEX_SHADER);
+ } else {
+ 	return null;
+ }
+ gl.shaderSource(shader, str);
+ gl.compileShader(shader); 
+```
+
+基本上，上述代码片段会使用 WebGL 的 `gl.createShader()` 函数创建一个着色器，然后使用 `gl.shaderSource()` 函数将源代码传入着色器，最后使用 `gl.compileShader()` 函数对着色器代码进行编译。
+
+`getShader()` 函数位于 `js/util.js` 中，在这个章节中，我们会一直使用这个工具函数，源代码点击[这里](https://bitbucket.org/dcantor/webgl-beginners-guide-code/src/a27b84e89b926c4a79bcd3c3b566486c53c38ee2/1727_03/js/utils.js?at=master&fileviewer=file-view-default)。
+ 
+回到 `initProgram()` 函数，我们使用下面的几行代码创建了着色器程序：
+
+``` javascript
+prg = gl.createProgram();
+gl.attachShader(prg, vertexShader);
+gl.attachShader(prg, fragmentShader);
+gl.linkProgram(prg);
+if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {
+	alert("Could not initialize shaders");
+}
+gl.useProgram(prg);
+```
+
+ 
+ 
