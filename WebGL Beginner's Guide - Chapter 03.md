@@ -416,7 +416,7 @@ void main(void) {
 
 因为顶点颜色已经在顶点着色器中计算好了，而片元颜色已经由 Varying 变量 `vFinalColor` 自动插值后输入到片元着色器中了，所以我们要做的只是简单的将 `vFinalColor` 赋值给片元着色器的输入变量 `gl_FragColor` 就可以了。
 
-### 编写 ESSL 程序
+## 编写 ESSL 程序
 
 让我们回退一步看看全景。ESSL 允许我们使用定义的着色方法和光线反射模型实现光照策略。在这一小节中，我们将会在场景中放置一个球体，然后看看光照是如何影响它的。
 
@@ -430,4 +430,64 @@ void main(void) {
 
 ### 高洛德着色加兰伯特反射
 
-兰伯特反射模型只考虑材质的漫反射和光线的漫反射属性。总之，我们可以这样
+兰伯特反射模型只考虑材质的漫反射和光线的漫反射属性。总之，我们可以这样计算：
+
+最终顶点颜色 = 光线漫反射 * 材质漫反射 * 兰伯特系数
+
+在高洛德着色法中，兰伯特系数是计算顶点法线和光线方向向量取反后的点积获得的。在点积计算前，两者向量都需要归一化。
+
+现在让我们看看这个示例中顶点着色器和片元着色器的代码，请查看 `ch3_Sphere_Goraud_Lambert.html`，源代码点击[这里](https://bitbucket.org/dcantor/webgl-beginners-guide-code/src/a27b84e89b926c4a79bcd3c3b566486c53c38ee2/1727_03/ch3_Sphere_Goraud_Lambert.html?at=master&fileviewer=file-view-default)。
+
+![高洛德着色加兰伯特反射](./images/1532585576685.png)
+
+顶点着色器：
+
+``` glsl
+attribute vec3 aVertexPosition;
+attribute vec3 aVertexNormal;
+
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
+uniform mat4 uNMatrix;
+
+uniform vec3 uLightDirection;   //light direction
+uniform vec4 uLightDiffuse;     //light color
+uniform vec4 uMaterialDiffuse;  //object color
+
+varying vec4 vFinalColor;
+
+void main(void) {
+ //Transformed normal position
+ vec3 N = normalize(vec3(uNMatrix * vec4(aVertexNormal, 1.0)));
+    
+ //Normalize light to calculate lambertTerm
+ vec3 L = normalize(uLightDirection);
+ 
+ //Lambert's cosine law
+ float lambertTerm = dot(N,-L);
+ 
+ //Final Color
+ vec4 Id = uMaterialDiffuse * uLightDiffuse * lambertTerm;
+ vFinalColor = Id;
+ vFinalColor.a = 1.0;
+    
+  //Transformed vertex position
+  gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+}
+```
+
+片元着色器
+
+``` glsl
+#ifdef GL_ES
+precision highp float;
+#endif
+
+varying vec4  vFinalColor;
+
+void main(void)  {
+ gl_FragColor = vFinalColor;
+}
+```
+
+
