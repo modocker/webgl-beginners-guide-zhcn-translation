@@ -756,5 +756,16 @@ if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {
 gl.useProgram(prg);
 ```
 
+在这里我们使用了许多由 WebGL 上下文提供的函数：
+
+- `createProgram()`：创建一个新的着色器程序（Program）。
+- `attachShader(Object program, Object shader)`：把一个着色器附加到当前的着色器程序上。
+- `linkProgram(Object program)`：创建输送给 GPU 可执行版本的顶点着色器和片元着色器。
+- `getProgramParameter(Object program, Object parameter)`：这个函数同 WebGL 的状态机机制有关。它允许我们查询着色器程序的参数。我们在这里使用这个函数来检测可执行版本的着色器程序是否被成功创建。
+- `useProgram(Object program)`：如果着色器程序代码合法（也就是说 `linkProgram()` 成功），将会在 GPU 中使用该着色器程序。
+
+最后，我们在 JavaScript 变量和着色器程序中的 Attribute 和 Uniform 变量间做了一个映射。
+
+
  
  
