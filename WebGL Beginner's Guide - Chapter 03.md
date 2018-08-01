@@ -764,8 +764,46 @@ gl.useProgram(prg);
 - `getProgramParameter(Object program, Object parameter)`：这个函数同 WebGL 的状态机机制有关。它允许我们查询着色器程序的参数。我们在这里使用这个函数来检测可执行版本的着色器程序是否被成功创建。
 - `useProgram(Object program)`：如果着色器程序代码合法（也就是说 `linkProgram()` 成功），将会在 GPU 中使用该着色器程序。
 
-最后，我们在 JavaScript 变量和着色器程序中的 Attribute 和 Uniform 变量间做了一个映射。
+最后，我们在 JavaScript 变量和着色器程序中的 Attribute 和 Uniform 变量间做了一个映射。我们在这里没有创建更多的 JavaScript 变量，而是将它们附在 `prg` 对象上。这个设计本身和 WebGL 没有关系，我们只是因为“洁癖”将所有相关的 JavaScript 变量都作为着色器程序对象的一部分。
 
+``` javascript
+prg.aVertexPosition = gl.getAttribLocation(prg, "aVertexPosition");
+prg.aVertexNormal = gl.getAttribLocation(prg, "aVertexNormal");
+prg.uPMatrix =gl.getUniformLocation(prg, "uPMatrix");
+prg.uMVMatrix = gl.getUniformLocation(prg, "uMVMatrix");
+prg.uNMatrix = gl.getUniformLocation(prg, "uNMatrix");
+
+
+prg.uLightDirection = gl.getUniformLocation(prg, "uLightDirection");
+prg.uLightAmbient = gl.getUniformLocation(prg, "uLightAmbient");
+prg.uLightDiffuse = gl.getUniformLocation(prg, "uLightDiffuse");
+prg.uMaterialDiffuse = gl.getUniformLocation(prg,"uMaterialDiffuse");
+}
+```
+
+以上就是 `initProgram` 函数的全部代码。在这里我们使用了下面的 WebGL 函数：
+
+- `Var reference = getAttribLocation(Object program,String name)`：这个函数接受两个参数，一个是着色器程序对象，另外一个是 Attribute 变量名称的字符串。这个函数将返回对应 Attribute 变量的引用。
+- `var reference = getUniformLocation(Object program,String uniform)`：这个函数接受两个参数，一个是着色器程序对象，另外一个是 Uniform 变量名称的字符串。这个函数将返回对应 Uniform 变量的引用。
+
+获得了着色器程序中变量的引用之后，我们就可以开始初始化 Attribute 和 Uniform了。
+
+### 初始化 Attribute 和 Uniform
+
+一旦我们编译并安装好着色器程序，下一步就是初始化 Attribute 和 Uniform 变量了。我们在 `initLights` 函数中初始化了 Uniform 变量。
+
+``` javascript
+function initLights(){
+ gl.uniform3fv(prg.uLightDirection, [0.0, 0.0, -1.0]);
+ gl.uniform4fv(prg.uLightAmbient, [0.01,0.01,0.01,1.0]);
+ gl.uniform4fv(prg.uLightDiffuse, [0.5,0.5,0.5,1.0]);
+ gl.uniform4fv(prg.uMaterialDiffuse, [0.1,0.5,0.8,1.0]);
+}
+```
+
+你可以看到我们使用了在 `initProgram` 函数中通过 `getUniformLocation` 获得的 Uniform 变量的引用，然后使用了下面几个 WebGL 提供的函数去设置 Uniform 变量。
+
+- `uniform[1234][fi]`：指定一个
 
  
  
